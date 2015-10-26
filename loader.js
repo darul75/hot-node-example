@@ -48,8 +48,8 @@ module.exports = function(source) {
   var routerNamePattern = /(?:var|const|let)\s*(\w+)\s*\=\s*(?:express\.Router)/g;
 
   //var appLevelPattern
-  var usePattern = /\.use\('((\/|[\w+\-\*]|\/?)*)/g;
-  var restPattern = /\.(?:get|post|delete|post)\('((\/|[\w+\-\*]|\/?)*)/g;
+  var usePattern = /\.use\('\/((\/|[\w+\-\*]|\/?)*)/g;
+  var restPattern = /\.(?:get|post|delete|post)\('\/((\/|[\w+\-\*]|\/?)*)/g;
   //var functionCallPattern = /(nameFunction[(\w\,\s)]+)/;
   var src = source.replace(/\r?\n|\r/g, ' ');
 
@@ -69,8 +69,12 @@ module.exports = function(source) {
 
   var results = [];
   var uses;
+  var lastIndex = -1;
   while ((uses = usePattern.exec(src)) !== null) {
     results.push(uses[1]);
+    if (lastIndex < 0) {
+      lastIndex = usePattern.lastIndex;
+    }
   }
 
   var rests;
@@ -81,6 +85,7 @@ module.exports = function(source) {
   console.log(results);
 
   console.log(requiresData);
+
 
    prependText = [
     /*'var __moduleBindings = ' + JSON.stringify(names) + ';\n',*/
@@ -98,9 +103,7 @@ module.exports = function(source) {
       '} else {\n\t',*/
 
       'console.log(module.hot.data);\n\t',
-
-      'if (testJulien != null) { \n\t',
-
+      'if (module.hot.data.hotCall.length > 0) {;\n\t',
       'var mainLayers = app._router.stack;\n\t',
 
       'var idxPathToRemove = [];\n\t',
@@ -152,10 +155,16 @@ module.exports = function(source) {
     '/* TEST */',
   ].join(' ');
 
-  var newContent = [
+  /*var newContent = [
       prependText,
       source,
       appendText
+    ].join(separator);*/
+
+  var txt2 = src.slice(0, lastIndex) + prependText + src.slice(lastIndex);
+
+  var newContent = [
+      txt2
     ].join(separator);
 
   //console.log(newContent);
