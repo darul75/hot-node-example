@@ -1,11 +1,9 @@
 // Feel free to edit this file
 var express = require('express');
 
-var express = require("express");
-
-var app = express();
-
 var testJulien = 'ee';
+
+var app = require('./index');
 
 var router = express.Router();
 
@@ -15,6 +13,8 @@ var welcome = require("./welcome");
 module.exports = function renderApp(input) {
 
 	console.log('export again');
+
+
 
 	var path = '/';
 	var pathRoute = '/api/*';
@@ -61,45 +61,24 @@ module.exports = function renderApp(input) {
 			    });
 		    }
     	}
-    });*/
+    });*/	
 
-	/*router.use('/api/*', function(req, res, next) {
-	  console.log('api julien');
-	});*/
-
-	router.use('/apiv1*', function(req, res, next) {
-	  console.log('asspi julien');
+	router.get('/api', function(req, res, next) {
+	  res.send('api');
 	});
 
-	router.use('/apiv1*', function(req, res, next) {
-	  console.log('asspi julien coucou');
+	router.get('/user', function(req, res, next) {
+	  res.send('userddd');
 	});
 
-	router.use('/toto', function(req, res, next) {
-	  console.log('toto');
-	});
-
-	router.use('/toto', function(req, res, next) {
-	  console.log('tutu');
-	});
-
-	app.get('/', function (req, res) {
-	  console.log(new Date());
-	  res.send('jul rot');
-	});
-
-	app.delete('/titi', function (req, res) {
-	  console.log(new Date());
-	  res.send('jul rot');
+	router.get('/login', function(req, res, next) {
+	  res.send('logindd');
 	});
 
 	app.use(router);
 
 	return [
-		welcome,
-		"World julikkkksssen",
-		"Module loaded at", moduleLoadTime.toLocaleTimeString(),
-		"Rendered at", input.toLocaleTimeString()
+		welcome
 	].join(" ");
 };
 
