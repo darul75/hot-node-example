@@ -163,12 +163,14 @@ module.exports = function(source) {
 
   var txt2 = src.slice(0, lastIndex) + prependText + src.slice(lastIndex);
 
+  console.log(txt2);
+
   var newContent = [
       txt2
     ].join(separator);
 
   //console.log(newContent);
 
-  return newContent;
+  return txt2;
   //return this.callback(null, newContent);
 }
