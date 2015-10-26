@@ -20,6 +20,8 @@
   },
   "homepage": "https://github.com/webpack/hot-node-example",
   "dependencies": {
+    "acorn": "^2.0.4",
+    "express": "^4.12.3",
     "node-libs-browser": "^0.5.0",
     "webpack": "^1.9.7"
   }

@@ -1,6 +1,6 @@
 // Feel free to edit this file
 
-module.exports = "Hello";
+module.exports = "Hellodddd";
 
 // just logging, not needed in real app
 if(module.hot) {
