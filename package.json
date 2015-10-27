@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "rm -rf out && webpack",
-    "hot": "rm -rf out && webpack \"webpack/hot/poll?1000\" --watch --hot",
+    "hot": "rm -rf out && webpack --watch --hot",
     "start": "node out/bundle.js"
   },
   "repository": {
@@ -21,8 +21,10 @@
   "homepage": "https://github.com/webpack/hot-node-example",
   "dependencies": {
     "acorn": "^2.0.4",
+    "babel-loader": "^5.3.2",
     "express": "^4.12.3",
     "node-libs-browser": "^0.5.0",
+    "source-map": "^0.4.4",
     "webpack": "^1.9.7"
   }
 }

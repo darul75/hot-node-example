@@ -1,20 +1,23 @@
 var path = require("path");
+var webpack = require("webpack");
+
 module.exports = {
-	entry: {
-		main: "./index.js"
-	},
+	devtool: '#source-map',
+	entry: [
+		'./index.js',
+		'webpack/hot/poll?1000'
+	],
 	output: {
 		path: path.join(__dirname, "out"),
 		libraryTarget: 'commonjs2',
 		filename: "bundle.js"
 	},
 	module: {
-    	// devtool: 'source-map',
     	preLoaders: [
-      	/*{test: /\.js$/, loader: "./test-loader", exclude: /node_module/},*/
-      		{test: /\.js$/, loader: "./loader", exclude: /node_module/}
+      		{test: /\.js$/, loaders: ['./express-hot-loader'], exclude: /node_modules/},
     	]
   	},
 	externals: /^[a-z][a-z\.\-0-9]*$/,
-	target: "node"
+	target: "node",
+	plugins:[new webpack.NoErrorsPlugin()]
 };
