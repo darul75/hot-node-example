@@ -1,19 +1,5 @@
 'use strict';
 
-var didWarn = false;
-
-function warnOnce() {
-  if (!didWarn) {
-    console.warn(
-      'It appears that React Hot Loader isn\'t configured correctly. ' +
-      'If you\'re using NPM, make sure your dependencies don\'t drag duplicate React distributions into their node_modules and that require("react") corresponds to the React instance you render your app with.',
-      'If you\'re using a precompiled version of React, see https://github.com/gaearon/react-hot-loader/tree/master/docs#usage-with-external-react for integration instructions.'
-    );
-  }
-
-  didWarn = true;
-}
-
 module.exports = {
 
   doReload: function (app, data) {
@@ -27,7 +13,7 @@ module.exports = {
       var idxMainRouteToRemove = [];
       // 'if (typeof layer.handle === "function" ||\n\t',
       if (typeof layer.handle === "function" || layer.route != null) {
-          console.log(layer);
+          //console.log(layer);
 
           var stack = layer.route != null && layer.route.stack != null ? layer.route.stack : layer.handle.stack;
 
@@ -92,5 +78,11 @@ module.exports = {
 
   setExpressResourcePath: function(path) {
     this.mainExpressResourcePath = path;
+  },
+
+  warn: function() {
+    console.warn(
+      'It appears you put your middlewares/routes in main file. ' +
+      'Please declare it in your dependencies.');
   }
 };

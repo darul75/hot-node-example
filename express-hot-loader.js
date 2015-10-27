@@ -58,7 +58,7 @@ module.exports = function(source, map) {
   /* MATCH
   middleware and HTTP method routes
   */
-  var routerLevelPattern = /\.(?:get|post|delete|post)\('(\/([\w+\-\*]|\/?)*)/g;
+  var routerLevelPattern = /\.(?:all|get|param|post|delete|post|route|use)\('(\/([\w+\-\*\:]|\/?)*)/g;
 
   var expressInstanciationPattern = /express\(\)/g;
 
@@ -95,36 +95,38 @@ module.exports = function(source, map) {
     processor.setExpressResourcePath(resourcePath);
   }
 
-  prependTxt = [
-    'var containsExpressInstance = ' +JSON.stringify(containsExpressInstance) + ';\n\t',
-
+  prependTxt = [    
     'try {',
       '(function () {',
-
   ];
 
   appendTxt = [
     '/* EXPRESS HOT LOADER */',
       '}).call(this);',
     '} finally {',
-    'if (containsExpressInstance) {',
-
-    '}',
+    
     'if (module.hot && ' +JSON.stringify(fine) +') {\n\t',
-      'module.hot.data = {\n\t\t',
-        'routerNames: '+JSON.stringify(routerNames)+',\n\t\t',
-        'routes: '+JSON.stringify(routes)+',\n\t',
-      '};\n',
 
       'var processor = require(' + JSON.stringify(require.resolve('./processor')) + ');\n\t',
       'var expressFile = ' +JSON.stringify(processor.mainExpressResourcePath) + ';\n\t',
-
       'var expressReloadApp = require(' + JSON.stringify(require.resolve(processor.mainExpressResourcePath)) + ');\n\t',
 
       'module.hot.dispose(function(data){\n\t',
           'data.msg = "hot hot";\n\t',
           'console.log("update needed");',
       '});\n',
+
+      'var warning = '+JSON.stringify(containsExpressInstance)+' && '+(routes != null && routes.length > 0) + ';',
+
+      'module.hot.data = {\n\t\t',
+        'routerNames: '+JSON.stringify(routerNames)+',\n\t\t',
+        'routes: '+JSON.stringify(routes)+',\n\t',
+        'warning: warning\n\t',
+      '};\n',
+
+      'if (module.hot.data.warning) {',
+        'processor.warn();',
+      '}',
 
       'if (module.hot.data.routes.length > 0 && expressReloadApp != null) {;\n\t\t',
         'processor.doReload(expressReloadApp, module.hot.data);',

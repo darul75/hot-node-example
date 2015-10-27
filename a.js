@@ -8,6 +8,10 @@ var welcome = require("./welcome");
 
 module.exports = function renderApp(app) {
 
+	router.get('/api', function(req, res) {
+		res.send('api');
+	});
+
 	doRoute(app);
 
 	return [
@@ -17,18 +21,28 @@ module.exports = function renderApp(app) {
 
 function doRoute(app) {
 
-	console.log('export again');
+	router.get('/home', function(req, res) {
+		res.send('homedd');
+	});	
 
-	var path = '/';
-	var pathRoute = '/api/*';
-
-
-	router.get('/tutu', function(req, res) {
-		res.send('ddd');
+	router.param('user', function(req, res, next, id) {
+		console.log('use:' + id);
+		req.user = {		    
+		    name: id
+		  };
+		next();
 	});
 
-	app.get('/titddi', function(req, res) {
-	  res.send('https://github.com/webpack/webpack/issues/418');
+	router.route('/users/:user').all(function(req, res, next) {
+	  res.send('user is ' + req.user.name);
+	});
+
+	router.use('/use', function(req, res, next) {
+	  res.send('use all');
+	});
+
+	app.get('/contact', function(req, res) {
+	  res.send('contactdd');
 	});
 
 	app.use(router);
