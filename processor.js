@@ -1,5 +1,7 @@
 'use strict';
 
+var isExpressRouting = require('./isExpressRouting');
+
 module.exports = {
 
   doReload: function (app, data) {
@@ -84,5 +86,14 @@ module.exports = {
     console.warn(
       'It appears you put your middlewares/routes in main file. ' +
       'Please declare it in your dependencies.');
+  },
+
+  checkModule: function(mod, __webpack_require__) {
+
+    mod.children.forEach(function(elt) {
+      var requiredModule = __webpack_require__(elt);
+
+      console.log(requiredModule.toString());
+    });
   }
 };

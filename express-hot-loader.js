@@ -1,5 +1,6 @@
 var acorn = require('acorn'),
   path = require('path'),
+  isExpressRouting = require('./isExpressRouting'),
   SourceNode = require('source-map').SourceNode,
   SourceMapConsumer = require('source-map').SourceMapConsumer,
   makeIdentitySourceMap = require('./makeIdentitySourceMap');
@@ -23,14 +24,17 @@ module.exports = function(source, map) {
     var ast = acorn.parse(source);
   }
   catch (err) {
-    //console.log(err);
     fine = false;
     return this.callback(err);
   }
 
-  var names = ast.body
-      .filter(function(node) { return node.type === 'FunctionDeclaration'; })
-      .map(function(node) { return node.id.name; });
+  /* USE PARSING ?
+  var names = ast.body.filter(function(node) {
+        return node.type === 'FunctionDeclaration';
+      }).map(function(node) {
+        return node.id.name;
+      });
+  */
 
   console.log('--------resource --------');
   console.log(resourcePath);
@@ -46,56 +50,15 @@ module.exports = function(source, map) {
       appendTxt,
       separator = '\n\n';
 
-  /* MATCH
-  following declaration
-
-  var router = express.Router();
-  const router = express.Router();
-  let router = express.Router();
-  */
-  var routerNamePattern = /(?:var|const|let)\s*(\w+)\s*\=\s*(?:express\.Router)/g;
-
-  /* MATCH
-  middleware and HTTP method routes
-  */
-  var routerLevelPattern = /\.(?:all|get|param|post|delete|post|route|use)\('(\/([\w+\-\*\:]|\/?)*)/g;
-
-  var expressInstanciationPattern = /express\(\)/g;
-
-  var containsExpressInstance = expressInstanciationPattern.test(src);
-
-  /*
-  search for require involving express routers or app middlewares
-  */
-  var requirePattern = /(var\s*)(\w+)* = require\(("|\')([\w+|\.|\/]*)("|\')(\)\;)/g;
-
-  var routerNames = [];
-
-  var routeVariableNameMatch;
-  while ((routeVariableNameMatch = routerNamePattern.exec(src)) !== null) {
-    routerNames.push(routeVariableNameMatch[1]);
-  }
-
-  var routes = [];
-  var uses;
-  var lastIndex = -1;
-  while ((uses = routerLevelPattern.exec(src)) !== null) {
-    routes.push(uses[1]);
-    if (lastIndex < 0) {
-      lastIndex = routerLevelPattern.lastIndex;
-    }
-  }
-
-  console.log(routerNames);
-  console.log(routes);
+  var check = isExpressRouting.check(src);
 
   var processor = require('./processor');
 
-  if (containsExpressInstance) {
+  if (check.containsExpressInstance) {
     processor.setExpressResourcePath(resourcePath);
   }
 
-  prependTxt = [    
+  prependTxt = [
     'try {',
       '(function () {',
   ];
@@ -104,29 +67,28 @@ module.exports = function(source, map) {
     '/* EXPRESS HOT LOADER */',
       '}).call(this);',
     '} finally {',
-    
+
     'if (module.hot && ' +JSON.stringify(fine) +') {\n\t',
+
+      'module.hot.dispose(function(data){\n\t',
+          'data.msg = "current state, nothing to add ?";\n\t',
+      '});\n',
 
       'var processor = require(' + JSON.stringify(require.resolve('./processor')) + ');\n\t',
       'var expressFile = ' +JSON.stringify(processor.mainExpressResourcePath) + ';\n\t',
       'var expressReloadApp = require(' + JSON.stringify(require.resolve(processor.mainExpressResourcePath)) + ');\n\t',
 
-      'module.hot.dispose(function(data){\n\t',
-          'data.msg = "hot hot";\n\t',
-          'console.log("update needed");',
-      '});\n',
-
-      'var warning = '+JSON.stringify(containsExpressInstance)+' && '+(routes != null && routes.length > 0) + ';',
+      'var warning = '+JSON.stringify(check.containsExpressInstance)+' && '+(check.routes != null && check.routes.length > 0) + ';',
 
       'module.hot.data = {\n\t\t',
-        'routerNames: '+JSON.stringify(routerNames)+',\n\t\t',
-        'routes: '+JSON.stringify(routes)+',\n\t',
+        'routerNames: '+JSON.stringify(check.routerNames)+',\n\t\t',
+        'routes: '+JSON.stringify(check.routes)+',\n\t',
         'warning: warning\n\t',
       '};\n',
 
-      'if (module.hot.data.warning) {',
+      /*'if (module.hot.data.warning) {',
         'processor.warn();',
-      '}',
+      '}',*/
 
       'if (module.hot.data.routes.length > 0 && expressReloadApp != null) {;\n\t\t',
         'processor.doReload(expressReloadApp, module.hot.data);',

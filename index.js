@@ -27,5 +27,4 @@ if(module.hot) {
 
 		}
 	});
-
 }
