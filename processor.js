@@ -7,75 +7,53 @@ module.exports = {
   doReload: function (app, data) {
     console.log("PATCHING EXPRESS ROUTES");
 
-    var mainLayers = app._router.stack;
     var idxPathToRemove = [];
 
-    mainLayers.forEach(function(layer, idx) {
-
-      var idxMainRouteToRemove = [];
-      // 'if (typeof layer.handle === "function" ||\n\t',
-      if (typeof layer.handle === "function" || layer.route != null) {
-          //console.log(layer);
-
-          var stack = layer.route != null && layer.route.stack != null ? layer.route.stack : layer.handle.stack;
-
-          if (stack != null) {
-            var idxRoutesToRemove = [];
-
-            stack.forEach(function(subLayer, idx2) {
-              //console.log(subLayer);,
-              data.routes.forEach(function(path) {
-                try {
-                  var match = subLayer.match(path);
-                  if (match) {
-                    if (idxMainRouteToRemove.indexOf(idx) < 0) {
-                      idxMainRouteToRemove.push(idx);
-                    }
-                    if (idxRoutesToRemove.indexOf(idx2) < 0) {
-                      idxRoutesToRemove.push(idx2);
-                    }
-                  }
-                }
-                catch (err) {
-                  console.log(err);
-                }
-              });
-
-              idxRoutesToRemove.forEach(function(elt, idx) {
-                stack.splice(idx, 1);
-              });
-            });
-
-            //console.log(idxMainRouteToRemove);
-            idxMainRouteToRemove.forEach(function(elt, idx) {
-              layer.handle.stack.splice(idx, 1);
-            });
-          }
-      }
-
-      //  another pass for old way
-      idxMainRouteToRemove = [];
-      data.routes.forEach(function(path) {
+    var matchRoute = function(layer, idx) {
+      for (var i=0; i<data.routes.length; i++) {
+        var path = data.routes[i];
         try {
           var match = layer.match(path);
           if (match) {
-            if (idxMainRouteToRemove.indexOf(idx) < 0) {
-              idxMainRouteToRemove.push(idx);
-            }
+            idxPathToRemove.push(idx);
+            return false;
           }
         }
         catch (err) {
           console.log(err);
         }
-      });
-
-      if (layer.route != null) {
-        idxMainRouteToRemove.forEach(function(elt) {
-          layer.route.stack.splice(0, 1);
-        });
       }
 
-    });
+      return true;
+    };
+
+    var removeRoute = function(layer, idx, layers) {
+      // app.get => layer.route.stack (Route)
+      // or
+      // router.get => layer.handle.stack
+
+      var stack = layer.handle.stack;
+
+      if (stack != null) {
+
+        var oldLengh = stack.length;
+
+        var newStack = stack.filter(matchRoute);
+
+        if (oldLengh !== newStack.length) {
+          layers.splice(idx, 1);
+        }
+
+      }
+
+      if (layer.route) {
+        layer.route.stack.forEach(removeRoute);
+      }
+
+    };
+
+    app._router.stack.forEach(removeRoute);
+
   },
 
   setExpressResourcePath: function(path) {

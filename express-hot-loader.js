@@ -59,7 +59,14 @@ module.exports = function(source, map) {
   }
 
   prependTxt = [
+
+    'var processor = require(' + JSON.stringify(require.resolve('./processor')) + ');\n\t',
+    'var expressFile = ' +JSON.stringify(processor.mainExpressResourcePath) + ';\n\t',
+    'var app = require(' + JSON.stringify(require.resolve(processor.mainExpressResourcePath)) + ');\n\t',
+
     'try {',
+
+
       '(function () {',
   ];
 
@@ -72,11 +79,10 @@ module.exports = function(source, map) {
 
       'module.hot.dispose(function(data){\n\t',
           'data.msg = "current state, nothing to add ?";\n\t',
+          'if (module.hot.data.routes.length > 0 && app != null) {;\n\t\t',
+            'processor.doReload(app, module.hot.data);',
+          '}',
       '});\n',
-
-      'var processor = require(' + JSON.stringify(require.resolve('./processor')) + ');\n\t',
-      'var expressFile = ' +JSON.stringify(processor.mainExpressResourcePath) + ';\n\t',
-      'var expressReloadApp = require(' + JSON.stringify(require.resolve(processor.mainExpressResourcePath)) + ');\n\t',
 
       'var warning = '+JSON.stringify(check.containsExpressInstance)+' && '+(check.routes != null && check.routes.length > 0) + ';',
 
@@ -89,10 +95,6 @@ module.exports = function(source, map) {
       /*'if (module.hot.data.warning) {',
         'processor.warn();',
       '}',*/
-
-      'if (module.hot.data.routes.length > 0 && expressReloadApp != null) {;\n\t\t',
-        'processor.doReload(expressReloadApp, module.hot.data);',
-      '}',
 
     '}}'
   ].join(' ');

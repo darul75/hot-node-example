@@ -3,6 +3,10 @@ var express = require('express');
 
 var router = express.Router();
 
+console.log("b");
+
+console.log("eee");
+
 module.exports = function renderApp(app) {
 
 	console.log('export again');
@@ -10,13 +14,14 @@ module.exports = function renderApp(app) {
 	var path = '/';
 	var pathRoute = '/api/*';
 
+	console.log('b redddqddduisssrement');
 
 	router.get('/tutu', function(req, res) {
-		res.send('tuddddtu');
+		res.send('tutsssu');
 	});
 
 	app.get('/titi', function(req, res) {
-	  res.send('titi');
+	  res.send('ssss');
 	});
 
 	app.use(router);
@@ -28,6 +33,8 @@ module.exports = function renderApp(app) {
 if(module.hot) {
 
 	module.hot.dispose(function() {
-		console.log("Disposed renderApp.js");
+		console.log("Disposed b.js");
 	});
+
+	//module.hot.accept();
 }
