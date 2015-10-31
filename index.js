@@ -8,16 +8,21 @@ var app = module.exports = express();
 app.set('port', process.env.PORT || 3000);
 app.use(express.static('out'));
 
-require("./a")(app);
+// routes app
+require('./routes')(app);
 
 http.createServer(app).listen(app.get('port'), function() {
   console.log('Express server listening on port ' + app.get('port'));
 });
 
+app.get('/warning', function(req, res) {
+	// warning
+})
+
 if(module.hot) {
-	module.hot.accept("./a", function() {
+	module.hot.accept('./routes', function() {
 		try {
-			require("./a")(app);
+			require('./routes')(app);
 		}
 		catch(e) {
 

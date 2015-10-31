@@ -5,17 +5,14 @@ var isExpressRouting = require('./isExpressRouting');
 module.exports = {
 
   doReload: function (app, data) {
-    console.log("PATCHING EXPRESS ROUTES");
+    console.log("PATCHING EXPRESS ROUTES");    
 
-    var idxPathToRemove = [];
-
-    var matchRoute = function(layer, idx) {
+    var matchRoute = function(layer, idx) {      
       for (var i=0; i<data.routes.length; i++) {
         var path = data.routes[i];
         try {
           var match = layer.match(path);
           if (match) {
-            idxPathToRemove.push(idx);
             return false;
           }
         }
@@ -25,14 +22,13 @@ module.exports = {
       }
 
       return true;
-    };
+    };    
 
-    var removeRoute = function(layer, idx, layers) {
-      // app.get => layer.route.stack (Route)
-      // or
-      // router.get => layer.handle.stack
+    var checkRoute = function(layer) {      
 
-      var stack = layer.handle.stack;
+      var stack = layer.handle.stack || (layer.name === 'bound dispatch' ? [layer] : null);
+
+      var removes = [];      
 
       if (stack != null) {
 
@@ -40,20 +36,37 @@ module.exports = {
 
         var newStack = stack.filter(matchRoute);
 
-        if (oldLengh !== newStack.length) {
-          layers.splice(idx, 1);
+        if (oldLengh !== newStack.length) {                
+          return true;
         }
 
       }
 
-      if (layer.route) {
-        layer.route.stack.forEach(removeRoute);
-      }
-
+      if (layer.route) {        
+        checkRoutes(layer.route.stack);
+      }                 
     };
 
-    app._router.stack.forEach(removeRoute);
+    var checkRoutes = function(stack) {
 
+      var removes = [];
+
+      for (var i = 0;i<stack.length;i++) {
+        var check = checkRoute(stack[i]);
+        if (check) {
+          removes.push(i);
+        }
+      }
+
+      removes.sort(function(a, b) { return a - b; });
+
+      for (var i = removes.length -1; i >= 0; i--) {
+        stack.splice(removes[i],1);        
+      }
+    };        
+
+    checkRoutes(app._router.stack);
+    
   },
 
   setExpressResourcePath: function(path) {
@@ -62,16 +75,9 @@ module.exports = {
 
   warn: function() {
     console.warn(
-      'It appears you put your middlewares/routes in main file. ' +
-      'Please declare it in your dependencies.');
-  },
-
-  checkModule: function(mod, __webpack_require__) {
-
-    mod.children.forEach(function(elt) {
-      var requiredModule = __webpack_require__(elt);
-
-      console.log(requiredModule.toString());
-    });
+      '********************************************************\n' +
+      'It appears you put your middlewares/routes in main file.\n' +
+      'Please declare it in your dependencies.\n' +
+      '********************************************************\n');
   }
 };

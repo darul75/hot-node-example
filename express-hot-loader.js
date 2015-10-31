@@ -59,26 +59,16 @@ module.exports = function(source, map) {
   }
 
   prependTxt = [
-
-    'var processor = require(' + JSON.stringify(require.resolve('./processor')) + ');\n\t',
+    'var processor = require(' + JSON.stringify(require.resolve('./processor')) + ');',
+    '// INJECT EXPRESS APP',
     'var expressFile = ' +JSON.stringify(processor.mainExpressResourcePath) + ';\n\t',
     'var app = require(' + JSON.stringify(require.resolve(processor.mainExpressResourcePath)) + ');\n\t',
-
-    'try {',
-
-
-      '(function () {',
   ];
 
-  appendTxt = [
-    '/* EXPRESS HOT LOADER */',
-      '}).call(this);',
-    '} finally {',
+  appendTxt = [         
 
-    'if (module.hot && ' +JSON.stringify(fine) +') {\n\t',
-
-      'module.hot.dispose(function(data){\n\t',
-          'data.msg = "current state, nothing to add ?";\n\t',
+    'if (module.hot && ' +JSON.stringify(fine) +') {\n\t',      
+      'module.hot.dispose(function(data){\n\t',          
           'if (module.hot.data.routes.length > 0 && app != null) {;\n\t\t',
             'processor.doReload(app, module.hot.data);',
           '}',
@@ -92,11 +82,11 @@ module.exports = function(source, map) {
         'warning: warning\n\t',
       '};\n',
 
-      /*'if (module.hot.data.warning) {',
+      'if (module.hot.data.warning) {',
         'processor.warn();',
-      '}',*/
+      '}',
 
-    '}}'
+    '}'    
   ].join(' ');
 
   //appendTxt = [''];

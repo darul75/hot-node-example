@@ -23,11 +23,6 @@ module.exports = {
 
     var containsExpressInstance = expressInstanciationPattern.test(source);
 
-    /*
-    search for require involving express routers or app middlewares
-    */
-    var requirePattern = /(var\s*)(\w+)* = require\(("|\')([\w+|\.|\/]*)("|\')(\)\;)/g;
-
     var routerNames = [];
 
     var routeVariableNameMatch;

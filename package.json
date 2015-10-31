@@ -5,9 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "rm -rf out && webpack",
-    "hot": "rm -rf out && webpack --watch --hot",
-    "start": "node out/bundle.js"
+    "build": "rm -rf example/out && webpack",
+    "hot": "rm -rf example/out && webpack --watch --hot",
+    "start": "node example/out/bundle.js"
   },
   "repository": {
     "type": "git",
