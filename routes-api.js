@@ -14,7 +14,7 @@ module.exports = function renderApp(app) {
 	});
 
 	r1.get('/api', function (req, res, next) {
-	  res.send('api');
+	  res.send('ddd');
 	});
 
 	r1.get('/apiv3', function (req, res, next) {
@@ -27,7 +27,7 @@ module.exports = function renderApp(app) {
 	})
 
 	r2.get('/titi', function (req, res, next) {
-	  res.send('titi is back again again');	  
+	  res.send('titi is again again');	  
 	})
 
 	app.use(r1, r2);

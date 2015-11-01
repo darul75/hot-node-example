@@ -13,20 +13,20 @@ module.exports = function(source, map) {
   var resourcePath = this.resourcePath,
     filename = path.basename(resourcePath);
 
-  if (/[\\/]express-hot-loader[\\/]/.test(resourcePath)) {
+  if (/[\\/]webpack[\\/]express-hot-loader[\\/]/.test(resourcePath)) {
     return this.callback(null, source, map);
   }
 
   var fine = true;
 
   // parse source
-  try {
-    var ast = acorn.parse(source);
-  }
-  catch (err) {
-    fine = false;
-    return this.callback(err);
-  }
+  // try {
+  //   var ast = acorn.parse(source, {ecmaVersion: 6, sourceType: 'module'});
+  // }
+  // catch (err) {
+  //   fine = false;
+  //   return this.callback(err);
+  // }
 
   /* USE PARSING ?
   var names = ast.body.filter(function(node) {
@@ -54,42 +54,49 @@ module.exports = function(source, map) {
 
   var processor = require('./processor');
 
-  if (check.containsExpressInstance) {
-    processor.setExpressResourcePath(resourcePath);
-  }
+  var exportApp = '';
 
-  prependTxt = [
-    'var processor = require(' + JSON.stringify(require.resolve('./processor')) + ');',
-    '// INJECT EXPRESS APP',
-    'var expressFile = ' +JSON.stringify(processor.mainExpressResourcePath) + ';\n\t',
-    'var app = require(' + JSON.stringify(require.resolve(processor.mainExpressResourcePath)) + ');\n\t',
+  if (check.containsExpressInstance) {
+    exportApp = 'module.exports = app;\n';
+    processor.setExpressResourcePath(resourcePath);
+  }    
+
+  prependTxt = [    
+    'var processor = require(' + JSON.stringify(require.resolve('./processor')) + ');\n',    
   ];
 
-  appendTxt = [         
+  if (processor.mainExpressResourcePath != null &&
+    processor.mainExpressResourcePath !== resourcePath) {  
+    // INJECT EXPRESS APP
+    prependTxt.push('var expressFile = ' +JSON.stringify(processor.mainExpressResourcePath) + ';\n\t');
+    prependTxt.push('var app = require(' + JSON.stringify(require.resolve(processor.mainExpressResourcePath)) + ');\n\t');    
+  }
 
+  prependTxt = prependTxt.join(' ');
+
+  appendTxt = [
+    exportApp,
     'if (module.hot && ' +JSON.stringify(fine) +') {\n\t',      
-      'module.hot.dispose(function(data){\n\t',          
-          'if (module.hot.data.routes.length > 0 && app != null) {;\n\t\t',
-            'processor.doReload(app, module.hot.data);',
-          '}',
-      '});\n',
+      'module.hot.dispose(function(data){\n\t\t',          
+        'if (module.hot.data.routes.length > 0 && app != null) {\n\t\t',
+          '\tprocessor.doReload(app, module.hot.data);\n',
+        '\t\t}\n',
+      '\t});\n\n',
 
-      'var warning = '+JSON.stringify(check.containsExpressInstance)+' && '+(check.routes != null && check.routes.length > 0) + ';',
+      'var warning = '+JSON.stringify(check.containsExpressInstance)+' && '+(check.routes != null && check.routes.length > 0) + ';\n\n',
 
-      'module.hot.data = {\n\t\t',
-        'routerNames: '+JSON.stringify(check.routerNames)+',\n\t\t',
+      'module.hot.data = {\n\t',
+        'routerNames: '+JSON.stringify(check.routerNames)+',\n\t',
         'routes: '+JSON.stringify(check.routes)+',\n\t',
-        'warning: warning\n\t',
-      '};\n',
+        'warning: warning\n',
+      '};\n\n',
 
-      'if (module.hot.data.warning) {',
-        'processor.warn();',
-      '}',
+      'if (module.hot.data.warning) {\n',
+        '\tprocessor.warn();\n',
+      '}\n',
 
     '}'    
   ].join(' ');
-
-  //appendTxt = [''];
 
   if (this.sourceMap === false) {
     return this.callback(null, [
@@ -99,17 +106,30 @@ module.exports = function(source, map) {
     ].join(separator));
   }
 
+  var newCode = [
+      prependTxt,
+      source,
+      appendTxt
+    ].join(separator);
+
   if (!map) {
-    map = makeIdentitySourceMap(source, this.resourcePath);
+    
+    // var transform = require("babel-core").transform(source, {
+    //   sourceMaps: true,
+    //   filename: this.resourcePath,
+    //   sourceFileName: this.resourcePath
+    // }); 
+
+    map = makeIdentitySourceMap(source, this.resourcePath);    
   }
 
-  node = new SourceNode(null, null, null, [
+  var node = new SourceNode(null, null, null, [
     new SourceNode(null, null, this.resourcePath, prependTxt),
     SourceNode.fromStringWithSourceMap(source, new SourceMapConsumer(map)),
     new SourceNode(null, null, this.resourcePath, appendTxt)
   ]).join(separator);
 
-  result = node.toStringWithSourceMap();
+  var result = node.toStringWithSourceMap();
 
   this.callback(null, result.code, result.map.toString());
 }

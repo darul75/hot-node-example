@@ -7,6 +7,7 @@ module.exports = {
   doReload: function (app, data) {
     console.log("PATCHING EXPRESS ROUTES");    
 
+    // match layer with current file routes
     var matchRoute = function(layer, idx) {      
       for (var i=0; i<data.routes.length; i++) {
         var path = data.routes[i];

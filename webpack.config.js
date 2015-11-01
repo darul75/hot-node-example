@@ -2,9 +2,9 @@ var path = require("path");
 var webpack = require("webpack");
 
 module.exports = {
-	devtool: '#source-map',
+	devtool: 'source-map',
 	entry: [
-		'./index.js',
+		'./index-es6.js',
 		'webpack/hot/poll?1000'
 	],
 	output: {
@@ -13,9 +13,10 @@ module.exports = {
 		filename: "bundle.js"
 	},
 	module: {
-    	preLoaders: [
-      		{test: /\.js$/, loaders: ['./express-hot-loader'], exclude: /node_modules/},
+    	loaders: [    		
+    		{test: /\.js$/, loaders: ['./express-hot-loader', 'babel-loader'], exclude: /node_modules/}
     	]
+
   	},
 	externals: /^[a-z][a-z\.\-0-9]*$/,
 	target: "node",

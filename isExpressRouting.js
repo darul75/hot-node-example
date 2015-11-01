@@ -7,14 +7,14 @@ var router = express.Router();
 const router = express.Router();
 let router = express.Router();
 */
-var routerNamePattern = /(?:var|const|let)\s*(\w+)\s*\=\s*(?:express\.Router)/g;
+//var routerNamePattern = /(?:var|const|let)\s*(\w+)\s*\=\s*(?:express\.Router)/g;
 
 /* MATCH
 middleware and HTTP method routes
 */
 var routerLevelPattern = /\.(?:all|get|param|post|delete|post|route|use)\('(\/([\w+\-\*\:]|\/?)*)/g;
 
-var expressInstanciationPattern = /express\(\)/g;
+var expressInstanciationPattern = /createServer\(/g;
 
 module.exports = {
 
@@ -23,12 +23,14 @@ module.exports = {
 
     var containsExpressInstance = expressInstanciationPattern.test(source);
 
-    var routerNames = [];
+    console.log("isExpress " + containsExpressInstance);
 
-    var routeVariableNameMatch;
-    while ((routeVariableNameMatch = routerNamePattern.exec(source)) !== null) {
-      routerNames.push(routeVariableNameMatch[1]);
-    }
+    // var routerNames = [];
+
+    // var routeVariableNameMatch;
+    // while ((routeVariableNameMatch = routerNamePattern.exec(source)) !== null) {
+    //   routerNames.push(routeVariableNameMatch[1]);
+    // }
 
     var routes = [];
     var uses;
@@ -40,14 +42,14 @@ module.exports = {
       }
     }
 
-    console.log(routerNames);
+    // console.log(routerNames);
     console.log(routes);
     console.log(containsExpressInstance);
 
     return {
       containsExpressInstance: containsExpressInstance,
-      routes: routes,
-      routerNames: routerNames
+      routes: routes
+      // routerNames: routerNames
     };
 
   }
