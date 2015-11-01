@@ -14,7 +14,7 @@ module.exports = {
 	},
 	module: {
     	loaders: [    		
-    		{test: /\.js$/, loaders: ['./express-hot-loader', 'babel-loader'], exclude: /node_modules/}
+    		{test: /\.js$/, loaders: ['express-hot-reload', 'babel-loader'], exclude: /node_modules/}
     	]
 
   	},

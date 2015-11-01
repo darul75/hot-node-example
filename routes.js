@@ -9,7 +9,7 @@ module.exports = function renderApp(app) {
 
 	app.route('/book')
     .get(function(req, res) {
-      res.send('Get a good book');
+      res.send('Get a good bodddok');
     })
     .post(function(req, res) {
       res.send('Add a book');

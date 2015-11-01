@@ -8,7 +8,7 @@ module.exports = function renderApp(app) {
 
 	app.route('/book')
     .get((req, res) => {
-      res.send('Get a good');
+      res.send('Get a book');
     })
     .post((req, res) => {
       res.send('Add a book');
