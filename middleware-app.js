@@ -16,7 +16,7 @@ module.exports = function(app) {
 
   // a route and its handler function (middleware system) which handles GET requests to /user/:id
   app.get('/book/:id', function (req, res, next) {
-    res.send('book is ', req.params.id);
+    res.send(req.params.id);
   });
 
 };
