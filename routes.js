@@ -1,41 +1,43 @@
 // Feel free to edit this file
-var express = require('express');
+const express = require('express');
+const router = express.Router();
 
-var router = express.Router();
+module.exports = function(app) {
 
-module.exports = function renderApp(app) {
+  // application routing
+  require('./routing-app')(app);
 
-  require('./routes-api')(app);
+  // application routing via Router application
+  require('./routing-router')(app);
 
-	app.route('/book')
-    .get(function(req, res) {
-      res.send('Get a good bodddok');
-    })
-    .post(function(req, res) {
-      res.send('Add a book');
-    })
-    .put(function(req, res) {
-      res.send('Update the book');
-    });
+  // application routing via Router instance
+  const routingModular = require('./routing-modular');
 
-  app.route('/bookie')
-    .get(function(req, res) {
-      res.send('Get a fff bodddok');
-    })
-    .post(function(req, res) {
-      res.send('Add a book');
-    })
-    .put(function(req, res) {
-      res.send('Update the book');
-    });  
+  app.use('/birds', routingModular);
 
-	return [].join(" ");
+  // application middleware
+  require('./middleware-app')(app);
+
+  // application middleware
+  require('./middleware-router')(app);
 };
 
-// just logging, not needed in real app
 if(module.hot) {
 
-	module.hot.accept('./routes-api', function() {
-		require('./routes-api')(app);
-	});
+  var acceptedDepencies = ['./routing-app', './routing-modular', './routing-router'];
+
+  module.hot.accept(acceptedDepencies, function() {
+    try {
+      require('./routing-app');
+      require('./routing-router');
+      require('./middleware-app');
+      require('./middleware-router');
+
+      const routingModular = require('./routing-modular');
+      app.use('/birds', routingModular);
+    }
+    catch(e) {
+
+    }
+  });
 }

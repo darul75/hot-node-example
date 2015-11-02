@@ -1,7 +1,7 @@
-var http = require('http');
-var express = require("express");
+import http from 'http';
+import express from 'express';
 
-var app = express();
+const app = module.exports = express();
 
 app.set('port', process.env.PORT || 3000);
 app.use(express.static('out'));
@@ -13,8 +13,10 @@ http.createServer(app).listen(app.get('port'), function() {
   console.log('Express server listening on port ' + app.get('port'));
 });
 
+
+// will trigger a warning, please use routing in sub modules.
 app.get('/warning', function(req, res) {
-	// warning
+
 })
 
 if(module.hot) {
